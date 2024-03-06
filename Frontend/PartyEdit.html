@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <style>
+        #partyNameInput {
+            width: 200px;
+        }
+
+        .p-2 label {
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">PartyProduct</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="Party.html">Party</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Product.html">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Assgin.html">Assigns</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="ProductRate.html">Product Rate</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="GetAllInvoices.html">Invoice</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="div">
+
+                <a href="Login.html"> <button id="logout" class="btn btn-dark">LogOut</button></a>
+            </div>
+        </div>
+    </nav>
+    <br>
+    <div class="container">
+        <h3>Edit Party</h3>
+    </div>
+    <br>
+    <div class="container border">
+
+
+        <div class="d-flex flex-row">
+            <div class="p-2"> <label class="EditId"># :</label></div>
+        </div>
+        <div class="d-flex flex-row ">
+            <div class="p-2"><label for="">Party Name : </label></div>
+            <div class="p-2"> <input class="form-control me-2" id="partyNameInput" placeholder="Party Name"></div>
+        </div>
+        <div class="d-flex flex-column">
+            <div class="p-2"> <a href="Party.html"></a> <button id="saveButton"
+                    class="btn btn-outline-success">Save</button></div></a>
+        </div>
+    </div>
+    <script>
+        document.getElementById('logout').addEventListener('click', () => {
+            localStorage.removeItem('token');
+        })
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        const partyNameDefault = urlParams.get('partyName');
+        document.getElementById('partyNameInput').value = partyNameDefault;
+
+        document.getElementsByClassName('EditId')[0].textContent = `# : ${id}`
+
+        //Saving my Data;
+        document.getElementById('saveButton').addEventListener('click', function () {
+
+            var partyName = document.getElementById('partyNameInput').value;
+
+
+            var partyId = parseInt(id);
+
+            var updatedParty = {
+                Id: partyId,
+                PName: partyName,
+
+            };
+            let token = localStorage.getItem('token');
+            // Make the API PUT request using fetch
+            fetch(`https://localhost:44345/api/Parties/${partyId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(updatedParty)
+            })
+                .then(response => {
+                    if (response.status === 401) {
+                        window.location.href = 'Login.html'
+                    }
+                    if (response.ok) {
+
+                        updateTableRow(partyId, partyName);
+
+                    } else {
+                        console.error('Update request failed');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+                alert('Party Edited Successfully')
+            location.href = 'Party.html'
+        });
+
+        function updateTableRow(id1, partyName) {
+
+            var row = document.querySelector(`#Edit${id1}`).closest('tr');
+
+
+            row.cells[1].innerText = partyName;
+           
+
+        }
+    </script>
+</body>
+
+</html>

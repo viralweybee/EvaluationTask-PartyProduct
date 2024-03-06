@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- bootstarp link -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <style>
+        .Invoice-Design {
+            border: 1px solid rgb(211, 210, 210);
+            padding: 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">PartyProduct</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="Party.html">Party</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Product.html">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="Assgin.html">Assigns</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="ProductRate.html">Product Rate</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="GetAllInvoices.html">Invoice</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="div">
+
+                <a href="Login.html"> <button id="logout" class="btn btn-dark">LogOut</button></a>
+            </div>
+        </div>
+    </nav>
+    <br>
+    <div class="container">
+        <h2>Edit-Mode of Invoice</h2>
+    </div>
+    <div class="container Invoice-Design">
+        <div class="container">
+            <span class="font-weight-bold">Party Name : </span>
+            <select id="Party" class="btn btn-light dropdown-toggle">
+                <option id="party1"></option>
+            </select>
+            <span class="font-weight-bold">Product Name : </span>
+            <select id="Product" class="btn btn-light dropdown-toggle">
+                <option id="product1">Select Product</option>
+            </select>
+        </div>
+        <br>
+        <div class="container">
+            <span id="rate" class="font-weight-bold">Rate : </span> <input id="rate1" type="text"  disabled> <span class="font-weight-bold" id="Quantity1">Quantity : </span><input
+                id="quantity" type="text">
+        </div>
+        <br>
+        <div class="container">
+            <button id="saveButton" class="btn btn-outline-success" type="submit">Save</button>
+        </div>
+    </div>
+    <script>
+        document.getElementById('logout').addEventListener('click', () => {
+            localStorage.removeItem('token');
+        })
+
+        //Convert date into a yyyy-mm-dd
+        function dataLogic(date) {
+            var month = '';
+            var year = '';
+            var day = '';
+            let j = 0;
+            for (let i = 0; i < date.length; i++) {
+                if (date[i] === '/') {
+                    j = i;
+                    break;
+                }
+                month += date[i];
+            }
+            let k = 0;
+            for (let i = j + 1; i < date.length; i++) {
+                if (date[i] === '/') {
+                    k = i;
+                    break;
+                }
+                day += date[i];
+            }
+            for (let i = k + 1; i < date.length; i++) {
+                if (date[i] === ' ') {
+                    break;
+                }
+                year += date[i];
+
+            }
+            var newDate = '';
+            var ans = '';
+
+            var newMonth = '';
+            if (month.length == 1) {
+                newMonth = '0';
+                newMonth += month[0];
+                ans = `${year}-${newMonth}`
+            }
+            else {
+                ans = `${year}-${month}`
+            }
+            if (day.length == 1) {
+                newDate = '0';
+                newDate += day[0];
+                ans += `-${newDate}`
+            }
+            else {
+                ans += `-${day}`
+            }
+            return ans;
+        }
+
+
+        const urlParams = new URLSearchParams(window.location.search);
+        var id = parseInt(urlParams.get('id'));
+        var partyName = urlParams.get('partyName');
+        var productName = urlParams.get('productName');
+        var rate = parseInt(urlParams.get('rate'));
+        var quantity = parseInt(urlParams.get('quantity'));
+        var dataDate = urlParams.get('date');
+        var finalDate = dataLogic(dataDate);
+
+
+        console.log(id, partyName, productName, rate, quantity, dataDate)
+        document.getElementById('party1').textContent = partyName
+        document.getElementById('product1').textContent = productName
+        document.getElementById('rate1').value =   rate;
+        document.getElementById('quantity').value = quantity;
+        // document.getElementById('Date').value=dataDate;
+
+        document.getElementById('saveButton').addEventListener('click', handleFunction)
+        async function handleFunction() {
+            var partyId = await fetchpartyId(partyName);
+            var productId = await fetchproductId(productName);
+            var party1 = parseInt(partyId);
+            var product1 = parseInt(productId);
+            quantity = parseInt(document.getElementById('quantity').value);
+
+
+            const invoiceData = {
+                Id: id,
+                PartyId: party1,
+                ProductId: product1,
+                Rate: rate,
+                Quantity: quantity,
+                Createdate: finalDate
+            };
+            console.log(id, party1, product1, rate, quantity);
+            console.log(typeof id, typeof party1, typeof product1, typeof rate, typeof quantity);
+
+            // Make a PUT request using the Fetch API
+
+            let token = localStorage.getItem('token');
+
+            fetch(`https://localhost:44345/api/Invoice/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(invoiceData),
+            })
+                .then(response => {
+                    if (response.status === 401) {
+                        window.location.href = 'Login.html'
+                    }
+                    if (response.ok) {
+                        // Successful response handling
+                        alert('Invoice Updated')
+                    } else if (response.status === 400) {
+                        // Bad Request, log the details for troubleshooting
+                        return response.json().then(errorData => {
+                            console.error('Bad Request:', errorData);
+                        });
+                    } else if (response.status === 404) {
+                        // Not Found
+                        console.error('Invoice not found');
+                    } else {
+                        // Handle other error cases
+                        console.error('Update request failed:', response.statusText);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        async function fetchpartyId(partyName) {
+            let token = localStorage.getItem('token');
+
+            try {
+                const options = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                };
+                const response = await fetch('https://localhost:44345/api/Parties', options);
+                if (response.status === 401) {
+                    window.location.href = 'Login.html'
+                }
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                for (let i = 0; i < data.length; i++) {
+                    if (data[i].partyName === partyName) {
+
+                        return data[i].id
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error fetching data:', error.message);
+            }
+
+        }
+        async function fetchproductId(productName) {
+            let token = localStorage.getItem('token');
+
+            try {
+                const options = {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                };
+                const response = await fetch('https://localhost:44345/api/Product', options);
+                if (response.status === 401) {
+                    window.location.href = 'Login.html'
+                }
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                for (let i = 0; i < data.length; i++) {
+                    if (data[i].productName === productName) {
+
+                        return data[i].id
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error fetching data:', error.message);
+            }
+        }
+    </script>
+</body>
+
+</html>

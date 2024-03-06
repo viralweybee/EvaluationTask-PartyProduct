@@ -1,0 +1,11 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Backend",
+    "\\Backend\\PartyProductAPI",
+    "\\Backend\\PartyProductAPI\\PartyProductAPI",
+    "\\Backend\\PartyProductAPI\\PartyProductAPI\\Controllers"
+  ],
+  "SelectedNode": "\\Backend\\PartyProductAPI\\PartyProductAPI\\Controllers\\PartiesController.cs",
+  "PreviewInSolutionExplorer": false
+}
